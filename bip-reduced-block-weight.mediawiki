@@ -21,7 +21,31 @@ This document is licensed under the 2-clause BSD license.
 == Motivation ==
 
 BIP 110's temporary rules restrict specific transaction and script forms used as data-storage channels, but do not limit total block data.
-A temporary reduction of the block weight limit constrains total data growth for the same period.
+As BIP 110 acknowledges, data can still be split across many smaller fields;
+such abuse becomes more costly and non-contiguous, but its total volume remains bounded only by the block weight limit.
+A temporary reduction of the block weight limit constrains that total for the same period, and also addresses several longer-standing concerns with the current limit.
+
+'''Node operating cost.'''
+Every full node must download and validate the entire chain, and the chain's growth rate is set by the block weight limit.
+Through the witness discount, the 4,000,000 weight-unit limit allows blocks of nearly 4 MB, or roughly 210 GB of chain growth per year at the target block rate.
+Initial block download (IBD) time is the main practical barrier to new users running their own node, and chain growth has historically outpaced the roughly 18% annual improvement in the underlying technology.<ref>[[bip-0103.mediawiki|BIP 103]] and [https://github.com/luke-jr/bips/blob/bip-blksize/bip-blksize.mediawiki Dashjr (2017)] estimate technology improvement at 17.7% per year.</ref>
+Bandwidth is often the binding constraint: many users have monthly data caps, and some connect over Tor, satellite, or other low-bandwidth links.
+Fewer self-validating users means more reliance on third parties, weakening the decentralization on which Bitcoin's security rests.
+
+'''Block propagation and mining decentralization.'''
+Larger blocks take longer to relay and validate, raising stale-block rates for poorly connected miners and favoring large, well-connected pools.
+This matters especially after a proof-of-work change, while mining hardware, pools, and relay infrastructure are still being rebuilt.
+
+'''UTXO set growth.'''
+The block weight limit also bounds how quickly the UTXO set can grow, and every node must keep the UTXO set in fast storage.
+
+'''Worst-case blocks.'''
+Full blocks of ordinary payment transactions serialize to roughly 1.5-2 MB;
+blocks approaching 4 MB are reachable mainly through witness-heavy data storage.
+The headroom between legitimate use and the limit is therefore largely headroom for abuse, and its cost is paid by every node.
+
+'''Temporary by design.'''
+The limit expires automatically, on the same schedule as BIP 110's rules, so it can be evaluated with real data and either renewed or left to lapse, rather than becoming permanent by default.
 
 == Specification ==
 
@@ -65,6 +89,14 @@ Regtest defaults to unscheduled unless explicitly configured.
 
 == Rationale ==
 
+'''Why 800,000 weight units?'''
+
+With a typical mix of transactions, 800,000 weight units corresponds to roughly 300 kB of serialized block data.
+This is close to the 300 kB block size limit previously proposed for long-term sustainability.
+Dashjr's 2017 [https://github.com/luke-jr/bips/blob/bip-blksize/bip-blksize.mediawiki block size limit draft] derived that figure by holding IBD cost constant under 17.7% annual technology improvement,
+and his 2019 talk [https://github.com/bitcointranscripts/bitcointranscripts/blob/master/magicalcryptoconference/2019/why-block-sizes-should-not-be-too-big.md "Why block sizes should not be too big"] supported it with IBD-time simulations.
+Unlike those proposals, this limit is temporary, and it is expressed purely as a weight limit.
+
 '''Why share the BIP 110 deployment parameters?'''
 
 Sharing the BIP 110 deployment parameters keeps the data-restricting rules on a single schedule, so miners and block-template users need to track only one activation and expiry.
@@ -92,3 +124,7 @@ The reference implementation is Bitcoin Knots tag [https://github.com/bitcoinkno
 
 Exception:
 the reference implementation of the extended testnet4 expiry is [https://github.com/bitcoinknots/bitcoin/commit/a7c4617524c334f542484bfef3919b9f12573840 v29.4.3.knots20260508].
+
+== References ==
+
+<references />
