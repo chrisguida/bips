@@ -1,0 +1,94 @@
+<pre>
+  BIP: ?
+  Layer: Consensus (soft fork)
+  Title: Temporary Reduced Block Weight Limit
+  Authors: Chris Guida <chrisguida+bips@gmail.com>
+  Status: Draft
+  Type: Specification
+  Assigned: ?
+  License: BSD-2-Clause
+  Requires: 110, 141, 145, FIXME-BLAKE2B
+</pre>
+
+== Abstract ==
+
+This document specifies a temporary reduction of the maximum block weight from 4,000,000 to 800,000 weight units, beginning at the BLAKE2b activation height and ending at a median-time-past expiry.
+
+== Copyright ==
+
+This document is licensed under the 2-clause BSD license.
+
+== Motivation ==
+
+BIP 110's temporary rules restrict specific transaction and script forms used as data-storage channels, but do not limit total block data.
+A temporary reduction of the block weight limit constrains total data growth for the same period.
+
+== Specification ==
+
+A deployment of this specification defines:
+
+* <code>activation_height</code>, equal to the BLAKE2b activation height; and
+* <code>expiry_time</code>, a Unix timestamp interpreted as median time past.
+
+A block is invalid if its weight, as defined by BIP 141, exceeds 800,000 weight units and:
+
+<pre>
+block_height >= activation_height
+and parent_median_time_past < expiry_time
+</pre>
+
+Using the parent median time past makes the limit for the next block knowable before constructing the block and monotone along a chain.
+
+=== Mining interface ===
+
+While the limit applies to a template's block, the getblocktemplate <code>weightlimit</code> field defined by BIP 145 MUST report 800,000.
+
+=== Deployment parameters ===
+
+The deployment parameters are the same as those of the BIP 110 flag-day deployment.
+
+For mainnet:
+
+<pre>
+activation_height = 961640
+expiry_time       = 1819756800  # 2027-09-01 00:00:00 UTC
+</pre>
+
+For testnet4:
+
+<pre>
+activation_height = 150308
+expiry_time       = 1806537600  # 2027-04-01 00:00:00 UTC
+</pre>
+
+Regtest defaults to unscheduled unless explicitly configured.
+
+== Rationale ==
+
+'''Why share the BIP 110 deployment parameters?'''
+
+Sharing the BIP 110 deployment parameters keeps the data-restricting rules on a single schedule, so miners and block-template users need to track only one activation and expiry.
+
+'''Why does the limit expire at a time rather than a height?'''
+
+Following a proof-of-work change, the rate at which blocks will be found is uncertain, at least initially.
+After the BLAKE2b upgrade, blocks were in fact found far faster than the target rate for several weeks while the difficulty caught up with the hash rate.
+An expiry height chosen for a year of expected blocks could have ended the limit after only nine or ten months;
+an expiry time ensures it covers a full year.
+
+'''Why use the parent's median time past for expiry?'''
+
+Parent median time past is used for expiry so miners and block-template users know whether the limit applies before selecting transactions.
+
+== Backward compatibility ==
+
+On its own, this limit is a soft fork:
+every block valid under it is valid under the previous 4,000,000 weight-unit limit.
+It is deployed at the BLAKE2b activation boundary, so nodes that do not implement the BLAKE2b upgrade do not share post-activation consensus with upgraded nodes regardless.
+
+== Reference implementation ==
+
+The reference implementation is Bitcoin Knots tag [https://github.com/bitcoinknots/bitcoin/commit/8c85b1585dac23f964e2dd32045624de7f02aa58 v29.4.1.knots20260508], principally <code>src/consensus/consensus.h</code>, <code>src/validation.cpp</code>, <code>src/node/miner.cpp</code>, and <code>src/rpc/mining.cpp</code>.
+
+Exception:
+the reference implementation of the extended testnet4 expiry is [https://github.com/bitcoinknots/bitcoin/commit/a7c4617524c334f542484bfef3919b9f12573840 v29.4.3.knots20260508].
