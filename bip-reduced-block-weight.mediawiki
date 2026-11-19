@@ -120,10 +120,8 @@ It is deployed at the BLAKE2b activation boundary, so nodes that do not implemen
 
 == Reference implementation ==
 
-The reference implementation is Bitcoin Knots tag [https://github.com/bitcoinknots/bitcoin/commit/8c85b1585dac23f964e2dd32045624de7f02aa58 v29.4.1.knots20260508], principally <code>src/consensus/consensus.h</code>, <code>src/validation.cpp</code>, <code>src/node/miner.cpp</code>, and <code>src/rpc/mining.cpp</code>.
-
-Exception:
-the reference implementation of the extended testnet4 expiry is [https://github.com/bitcoinknots/bitcoin/commit/a7c4617524c334f542484bfef3919b9f12573840 v29.4.3.knots20260508].
+The reference implementation is Bitcoin Knots tag [https://github.com/bitcoinknots/bitcoin/commit/a7c4617524c334f542484bfef3919b9f12573840 v29.4.3.knots20260508], principally <code>src/consensus/consensus.h</code>, <code>src/validation.cpp</code>, <code>src/node/miner.cpp</code>, and <code>src/rpc/mining.cpp</code>.
+The limit first shipped in [https://github.com/bitcoinknots/bitcoin/commit/8c85b1585dac23f964e2dd32045624de7f02aa58 v29.4.1.knots20260508], which used an earlier testnet4 expiry.
 
 == References ==
 
